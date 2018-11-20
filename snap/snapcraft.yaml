@@ -15,7 +15,6 @@ description: |
   Learn more at https://asciinema.org/
 
 confinement: classic
-base: core18
 grade: stable
 
 environment:
