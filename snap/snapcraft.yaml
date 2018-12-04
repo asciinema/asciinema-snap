@@ -1,5 +1,6 @@
 name: asciinema
-version: 2.0.1
+version: 'latest'
+version-script: wget -qO- https://pypi.python.org/pypi/asciinema/json | jq .info.version | sed -e 's/^"//' -e 's/"$//'
 summary: Record and share your terminal sessions, the right way
 description: |
   Forget screen recording apps and blurry video. Enjoy a lightweight, purely
@@ -27,5 +28,8 @@ apps:
 parts:
   asciinema:
     plugin: python
-    python-packages: [ 'asciinema', ]
-
+    python-packages:
+      - asciinema
+    build-packages:
+      - wget
+      - jq
