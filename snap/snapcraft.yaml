@@ -1,6 +1,6 @@
 name: asciinema
-version: 'latest'
-version-script: wget -qO- https://pypi.python.org/pypi/asciinema/json | jq .info.version | sed -e 's/^"//' -e 's/"$//'
+adopt-info: asciinema
+base: core18
 summary: Record and share your terminal sessions, the right way
 description: |
   Forget screen recording apps and blurry video. Enjoy a lightweight, purely
@@ -33,3 +33,6 @@ parts:
     build-packages:
       - wget
       - jq
+    override-build: |
+      snapcraftctl build
+      snapcraftctl set-version $(wget -qO- https://pypi.python.org/pypi/asciinema/json | jq .info.version | sed -e 's/^"//' -e 's/"$//')
