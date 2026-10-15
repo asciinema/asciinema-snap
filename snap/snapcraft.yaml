@@ -1,38 +1,58 @@
 name: asciinema
+base: core24
 adopt-info: asciinema
-base: core18
-summary: Record and share your terminal sessions, the right way
+title: Terminal session recorder and player
+summary: Record and share your terminal sessions, the simple way
+website:
+  - https://asciinema.org/
+  - https://docs.asciinema.org/
+source-code: https://github.com/asciinema/asciinema
+issues: https://github.com/asciinema/asciinema/issues
+contact: https://docs.asciinema.org/community/
+license: GPL-3.0+
 description: |
-  Forget screen recording apps and blurry video. Enjoy a lightweight, purely
-  text-based approach to terminal recording.
+  asciinema is a command-line tool for recording terminal sessions.
 
-  Record right where you work - in a terminal. To start just run 'asciinema
-  rec', to finish hit Ctrl-D or type exit. Any time you see a command you
-  want like to try in your own terminal just pause the player and copy-paste
-  the content you want. It's just a text after all! Easily embed an
-  asciicast player in your blog post, project documentation page or in your
-  conference talk slides.
+  Unlike typical screen recording software, which records visual output of a
+  screen into a heavyweight video files (.mp4, .mov), asciinema recorder runs
+  inside a terminal, capturing terminal session output into a lightweight
+  recording files in the asciicast format (.cast).
+
+  The recordings can be replayed in a terminal, embedded on a web page with
+  the asciinema player, or published to an asciinema server, such as
+  asciinema.org, for further sharing.
+
+  Typical use cases include creating tutorials, demonstrating command-line
+  tools, and sharing reproducible bug reports.
 
   Learn more at https://asciinema.org/
 
 confinement: classic
 grade: stable
 
-environment:
-  LC_ALL: C.UTF-8
-
 apps:
   asciinema:
     command: bin/asciinema
+    completer: usr/share/bash-completion/completions/asciinema
 
 parts:
   asciinema:
-    plugin: python
-    python-packages:
-      - asciinema
-    build-packages:
-      - wget
-      - jq
+    plugin: rust
+    source: https://github.com/asciinema/asciinema.git
+    source-type: git
+    build-attributes:
+      - enable-patchelf
+    rust-channel: stable
+    override-pull: |
+      craftctl default
+      # extract the latest git tag version
+      version=$(git describe --tags --abbrev=0)
+      # make sure we are actually using that version
+      git checkout tags/$version
+      craftctl set version=$(echo "$version" | sed 's/^v//')
+    build-environment:
+      - ASCIINEMA_GEN_DIR: $CRAFT_PART_SRC/_gen
     override-build: |
-      snapcraftctl build
-      snapcraftctl set-version $(wget -qO- https://pypi.python.org/pypi/asciinema/json | jq .info.version | sed -e 's/^"//' -e 's/"$//')
+      craftctl default
+      mkdir -p $CRAFT_PART_INSTALL/usr/share/bash-completion/completions
+      cp $ASCIINEMA_GEN_DIR/completion/asciinema.bash $CRAFT_PART_INSTALL/usr/share/bash-completion/completions/asciinema
